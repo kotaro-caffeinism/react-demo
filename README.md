@@ -1,70 +1,95 @@
-# Getting Started with Create React App
+# この React デモの解説
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## このデモの内容
 
-## Available Scripts
+PokeAPI を使用し、3 秒ごとにランダムなポケモンを取得し、名前とタイプを表示しています。
 
-In the project directory, you can run:
+## 注意してみてほしいポイント
 
-### `npm start`
+1. `.src/App.js` と `./src/componets/Pokemon.js` で使用している `useState`
+1. `./src/componets/Pokemon.js` で使用している `useEffect`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 気にしなくて良いポイント
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+これらの技術も使っていますが、React の動作を理解する上ではこれらは読み飛ばして OK です。
 
-### `npm test`
+1. 非同期処理
+1. setInterval
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 用語解説
 
-### `npm run build`
+- マウント: コンポーネントを最初に初めて読み込み、出力すること
+- レンダリング: React コンポーネントを DOM に出力するために様々な情報が読み込まれること
+- アンマウント: 不要になった React の要素を消してしまう（もう要らない）
+- コンポーネント: React 要素を返す関数
+- useState: React ではコンポーネントに state （状態）を持たせるために useState を使用します
+- useEffect: React では DOM の操作に直接関係しない部分は useEffect を使用して書きます
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## コードの内容
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. App.js ではページのメインとなるコンポーネントを書いています。ここでは `useState` を使用しています
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- デフォルトでは取得されたポケモンが表示されています。しかし useState を使用し、「クリックされるとポケモンの表示を消し、非表示にする」という処理を行っています。
 
-### `npm run eject`
+```js
+function App() {
+  const [visible, setVisible] = useState(true); // useState を使用
+  return (
+    <div className="App">
+      <h1>ランダムにポケモンを取得</h1>
+      {
+        visible ? ( // 三項演算子を使い、今  visible に true が入っているかを確かめます
+          <>
+            {" "}
+            // true が入っていれば Pokemon と、 false にできるボタンを返します
+            <Pokemon />
+            <button onClick={() => setVisible(false)}>
+              ポケモンの取得をやめる
+            </button>
+          </>
+        ) : (
+          <p>ポケモンの取得を終了しました</p>
+        ) // false が入っていれば、ポケモンとボタンを非表示にし、p タグを表示にします
+      }
+    </div>
+  );
+}
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. 今度はコンポーネント「Pokemon」の内容を見ていきましょう。 `./src/componets/` の中にあります。
+1. Pokemon.js ではポケモンのデータの取得 & 表示を行っています。
+1. 今回は難しい関数も書かれていますが、注目してほしい行は以下の通りです。
+1. 16 行目 〜 19 行目
+1. 4 行目 ・ 5 行目
+1. 23 行目 ・ 24 行目
+1. 16 行目 〜 19 行目:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- `setInterval` や `clearInterval` については気にしなくて OK ですが、どうしても気になる方は MDN を参照してください。JavaScript のビルトインメソッドで、関数を定期的に実行してくれています。
+- ここでは useEffect を使用し、データの取得を行っています。 useEffect の第一引数には実行したい処理を書いた関数が、第二引数には空の `[]` が入っています。つまり 17, 18 行目の処理は React コンポーネントのマウント時とアンマウント時に実行されます。
+- useEffect を使用しないとどうなるの？ という点についてはぜひ実際に useEffect をコメントアウトして試してみてください！ 何度も fetch の関数が実行されてしまい大変なことになると思います。これは React がレンダリングのたびにコンポーネントを読み直し、中に書いてあるコードを実行しているためです
+- 一番大切なのは 18 行目です。18 行目では「クリーンアップ」を行っています。 Pokemon コンポーネントは後でボタンを押して消す = アンマウントすることができます。ボタンを消した後もデータが fetch され続けていたら... 処理が重くなりますし、無駄なリクエストが増えて PokeAPI にも迷惑になります。ここでは `clearInterval` 関数を使って定期的な関数の実行を止めています。
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```js
+useEffect(() => {
+  const id = setInterval(() => fetchData(), 3000); // 3秒ごとに fetch を実施
+  return () => clearInterval(id); // クリーンアップをアンマウント時に実行することで、定期的な関数の実行を止める
+}, []); // 角括弧を渡しているのでマウント時とアンマウント時に実行される
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. 4 行目 ・ 5 行目:
 
-## Learn More
+- ここでは `useState` を使ってポケモンの名前とデータを保存する state を作っています。
+- React では通常の変数にデータを保存するとレンダリングされるときに値が消えてしまいます。state として保存するようにしましょう。
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. 23 行目 ・ 24 行目:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- 保存したポケモンの名前とタイプはここで使用しています。
+- name と type は state なので、変数として `{}` で囲んで使うことができます！
 
-### Code Splitting
+## 動作確認方法
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## まとめ
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+デモの解説は以上です。質問は `#slackoverflow` へお願いします！

@@ -5,7 +5,7 @@ function App() {
   const [visible, setVisible] = useState(true);
   return (
     <div className="App">
-      <h1>ランダムにポケモンを取得</h1>
+      <h1>3秒ごとにランダムなポケモンを取得</h1>
       {
         visible 
           ? <>
