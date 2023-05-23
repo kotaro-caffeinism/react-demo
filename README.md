@@ -88,8 +88,10 @@ useEffect(() => {
 
 ## 動作確認方法
 
+このリポジトリをクローンするか、[CodeSandbox](https://codesandbox.io/s/react-demo-8bj3vs?file=/src/App.js) で動作確認ができます。
+画面を操作しながらコンソールの表示を確認してみてください。CodeSandbox の操作を以下に載せます。
 
-
-## まとめ
+![Terminal をクリック](./image/screenshot-1.png)
+![コンソールが表示される](./image/screenshot-2.png)
 
 デモの解説は以上です。質問は `#slackoverflow` へお願いします！
